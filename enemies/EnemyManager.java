@@ -28,8 +28,9 @@ public class EnemyManager
 			}*/
 			if(System.currentTimeMillis() - lastAdd > ADD_TIME)
 			{
-				newCircles(SpawnType.CEILING, 10, 0.000002f, 0);
-				newCircles(SpawnType.FLOOR, 10, 0.000002f, 0);
+				//newCircles(SpawnType.CEILING, 10, 0.000002f, 0);
+				//newCircles(SpawnType.FLOOR, 10, 0.000002f, 0);
+				newCircles(SpawnType.CIRCLE, 25, 0.000002f, 500);
 				lastAdd = System.currentTimeMillis();
 			}
 		}

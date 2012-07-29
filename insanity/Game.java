@@ -17,7 +17,7 @@ public class Game extends BasicGameState
 	public static HashSet<Enemy> enemies = new HashSet();
 	private EnemyManager em = new EnemyManager();
 	public static QuadTree<Integer, Enemy> qa = new QuadTree<Integer, Enemy>();
-	public static QuadTree<Integer, Enemy> qb = new QuadTree<Integer, Enemy>();
+	//public static QuadTree<Integer, Enemy> qb = new QuadTree<Integer, Enemy>();
     public static HashSet<Enemy> rejects = new HashSet<Enemy>();
 	
 	public Game(final int stateID)
@@ -77,8 +77,8 @@ public class Game extends BasicGameState
 		if(container.getInput().isKeyPressed(Input.KEY_ESCAPE)) container.exit();
 		
 		em.manage(container.getFPS());
-		qa = qb;
-		qb = new QuadTree<Integer, Enemy>();
+		//qa = qb;
+		//qb = new QuadTree<Integer, Enemy>();
 		enemies.removeAll(rejects);
 		rejects.clear();
 		

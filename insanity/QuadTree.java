@@ -37,14 +37,17 @@ public class QuadTree<Key extends Comparable, Value>
 		}
 		else if(less(x,h.x)&&!less(y,h.y))
 		{
+			System.out.println("a");
 			h.NW = insert(h.NW,x,y,value);
 		}
 		else if(!less(x,h.x)&&less(y,h.y))
 		{
+			System.out.println("b");
 			h.SE = insert(h.SE,x,y,value);
 		}
 		else if(!less(x,h.x)&&!less(y,h.y))
 		{
+			System.out.println("c");
 			h.NE = insert(h.NE,x,y,value);
 		}
 		return h;
@@ -75,19 +78,19 @@ public class QuadTree<Key extends Comparable, Value>
 		}
 		if(less(xmin, h.x)&&less(ymin, h.y))
 		{
-			query2D(h.SW, rect, l);
+			l = query2D(h.SW, rect, l);
 		}
         if(less(xmin, h.x)&&!less(ymax, h.y))
 		{
-			query2D(h.NW, rect, l);
+			l = query2D(h.NW, rect, l);
 		}
         if(!less(xmax, h.x)&&less(ymin, h.y))
 		{
-			query2D(h.SE, rect, l);
+			l = query2D(h.SE, rect, l);
 		}
         if(!less(xmax, h.x)&&!less(ymax, h.y)) 
 		{
-			query2D(h.NE, rect, l);
+			l = query2D(h.NE, rect, l);
 		}
 		return l;
 	}

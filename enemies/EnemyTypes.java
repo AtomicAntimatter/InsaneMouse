@@ -33,7 +33,7 @@ public final class EnemyTypes
 		@Override
         public void logic(HashSet<Player> pl, int delta) 
         {
-            Interval<Integer> intX = new Interval<Integer>((int)loc[0]-1, (int)loc[0]+1);
+            /*Interval<Integer> intX = new Interval<Integer>((int)loc[0]-1, (int)loc[0]+1);
             Interval<Integer> intY = new Interval<Integer>((int)loc[1]-1, (int)loc[1]+1);
             Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
 			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect); 
@@ -42,7 +42,7 @@ public final class EnemyTypes
 				Enemy c = l.removeFirst();
 				insanity.Game.rejects.addAll(l);
 				insanity.Game.qb.insert(c.getLoc()[0], c.getLoc()[1], c);
-			}
+			}*/
 			
             float dx = Float.MAX_VALUE, d; 
 			
