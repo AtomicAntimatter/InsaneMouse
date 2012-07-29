@@ -1,11 +1,11 @@
 package enemies;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
+import insanity.Interval;
+import insanity.Interval2D;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
-import util.SetCallback;
+import java.util.LinkedList;
+import org.newdawn.slick.Color;
 import player.Player;
 
 public final class EnemyTypes 
@@ -16,27 +16,45 @@ public final class EnemyTypes
 
     public static class Circle extends Enemy 
     {
-        protected float invSpeed = 30000;
+        protected float speed;
 
+		@Override
         public Color getColor() 
         {
-            return Color.RED;
+            return Color.red;
         }
 
-        public Circle(float _x, float _y, float _invSpeed) 
+        public Circle(int[] mloc, float _speed) 
         {
-            super(_x, _y);
-            invSpeed = _invSpeed;
+            super(mloc);
+            speed = _speed;
         }
 
-        public void move(List ps, float speedAdjust) 
+		@Override
+        public void logic(HashSet<Player> pl, int delta) 
         {
-            float dx = Float.MAX_VALUE, d = 0; Player pm = null;
-            Iterator i = ps.iterator();
-            while(i.hasNext()) {
-                Player p = (Player)i.next();
-                d = distanceFrom(p.getX(), p.getY());
-                if(d<dx) {
+            Interval<Integer> intX = new Interval<Integer>((int)loc[0]-1, (int)loc[0]+1);
+            Interval<Integer> intY = new Interval<Integer>((int)loc[1]-1, (int)loc[1]+1);
+            Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
+			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect); 
+			if(!l.isEmpty())
+			{
+				Enemy c = l.removeFirst();
+				insanity.Game.rejects.addAll(l);
+				insanity.Game.qb.insert(c.getLoc()[0], c.getLoc()[1], c);
+			}
+			
+            float dx = Float.MAX_VALUE, d; 
+			
+			Player pm = null;
+			
+            Iterator<Player> i = pl.iterator();
+            while(i.hasNext()) 
+			{
+                Player p = i.next();
+                d = distanceFrom(p.getLoc());
+                if(d < dx) 
+				{
                     dx = d;
                     pm = p;
                 }
@@ -44,8 +62,8 @@ public final class EnemyTypes
             
             int directionX = 1;
             int directionY = 1;
-            float p1 = (pm.getY() - 5) - y;
-            float p2 = (pm.getX() - 5) - x;
+            float p1 = (pm.getLoc()[1] - 5) - loc[1];
+            float p2 = (pm.getLoc()[0] - 5) - loc[0];
 
             if(p1 < 0) 
             {
@@ -58,20 +76,22 @@ public final class EnemyTypes
             }
 
             float angle = (float) Math.atan(p1 / p2);
-            float deltaD = dx/invSpeed;
+            float deltaD = dx*speed*delta;
             float deltaX = deltaD * (float) Math.abs(Math.cos(angle)) * directionX;
             float deltaY = deltaD * (float) Math.abs(Math.sin(angle)) * directionY;
 
-            x += deltaX*speedAdjust;
-            y += deltaY*speedAdjust;
+            loc[0] += deltaX;
+            loc[1] += deltaY;
         }
 
+		@Override
         public boolean isMortal() 
         {
             return true;
         }
     }
-
+	
+/*
     public static class Monster extends Enemy 
     {
         protected float speed = 8;
@@ -280,5 +300,5 @@ public final class EnemyTypes
         public Color getColor() {
             return Color.CYAN;
         }         
-    }
+    }*/
 }

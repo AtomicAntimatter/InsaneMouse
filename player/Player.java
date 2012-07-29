@@ -1,37 +1,19 @@
 package player;
 
-import util.EnemyDeletable;
-import java.awt.*;
+import org.newdawn.slick.Color;
+import org.newdawn.slick.Graphics;
 
-public abstract class Player {
-
+public abstract class Player 
+{
     private static final int IMMUNITY_LIFETIME = 2000;
-    protected int lives;
-    protected boolean isActive;
-    protected boolean hasImmunity;
+    protected int lives = 3;
+    protected boolean isDead, hasImmunity;
     protected long lastImmunity;
-    protected float x;
-    protected float y;
-    protected SenbonSakura s;
+    protected int[] loc = new int[2];
 
-    public Player(int _x, int _y, int numberOfLives, boolean startActive, EnemyDeletable _parent, int _infoOffset, int _playerNumber, int _width) 
+    public int[] getLoc() 
     {
-        lives = numberOfLives;
-        isActive = startActive;
-        x = _x;
-        y = _y;
-        
-        s = new SenbonSakura(_width, _infoOffset, _playerNumber, _parent);       
-    }
-
-    public int getX() 
-    {
-        return (int)x;
-    }
-
-    public int getY() 
-    {
-        return (int)y;
+        return loc;
     }
 
     public int getLives() 
@@ -54,46 +36,25 @@ public abstract class Player {
         return hasImmunity;
     }
 
-    public void resetLives(int _lives) 
-    {
-        lives = _lives;
-    }
-
-    public void decLives(float _x, float _y) 
+    public void decLives() 
     {
         lives--;
-        x = _x;
-        y = _y;
+		if(lives == 0)
+		{
+			isDead = true;
+		}
     }
 
-    public boolean isActive() 
+    public boolean isDead() 
     {
-        return isActive;
+        return isDead;
     }
+	
+    public abstract void logic();
 
-    public void setActive(boolean isActive) 
+    public void render(Graphics g) 
     {
-        this.isActive = isActive;
-    }
-
-    public abstract void move();
-
-    protected void senbonSakura(boolean remote) 
-    {
-        if(remote)
-        {
-            s.detonateRemote(x, y);
-        }
-        else
-        {
-            s.detonateLocal(x, y);
-        }
-    }
-
-    public void paint(Graphics g) 
-    {
-        g.setColor(Color.WHITE);
-        g.fillOval((int)x - 5, (int)y - 5, 10, 10);
-        s.paint(g);
+        g.setColor(Color.white);
+        g.fillOval(loc[0] - 5, loc[1] - 5, 10, 10);
     }
 }

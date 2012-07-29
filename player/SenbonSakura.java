@@ -1,9 +1,11 @@
 package player;
-
+/*
 import enemies.Enemy;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
 import util.EnemyDeletable;
 import util.EnemyPredicate;
-import java.awt.*;
 
 public class SenbonSakura
 {
@@ -11,16 +13,18 @@ public class SenbonSakura
             SENBONSAKURA_RADIUS = 250, 
             SENBONSAKURA_SQUARE = SENBONSAKURA_RADIUS*SENBONSAKURA_RADIUS,
             SENBONSAKURA_TIMEOUT = 5000,
-            SENBONSAKURA_TIMER = 5000;  
+            SENBONSAKURA_TIMER = 5000, 
+            MAX_REMOTE_SENBON = 4,
+			WIDTH = 100;
     private long senbonSakuraT = 0;
     protected EnemyDeletable parent;
-    protected int playerNumber, width, infoOffset, senbonSakuraC;
-    protected float x, y, remoteX, remoteY;
+    protected int playerNumber, infoOffset, senbonSakuraC, timeRemaining, saveTime, next = 0;
+    protected float x, y;
+    protected float remoteX, remoteY;
     protected boolean detonateLocal = false, detonateRemote = false;
     
-    public SenbonSakura(int _width, int _infoOffset, int _playerNumber, EnemyDeletable _parent)
+    public SenbonSakura(int _infoOffset, int _playerNumber, EnemyDeletable _parent)
     {
-        width = _width;
         infoOffset = _infoOffset;
         playerNumber = _playerNumber;
         parent = _parent;
@@ -28,8 +32,10 @@ public class SenbonSakura
     
     public void detonateLocal(float _x, float _y)
     {     
-        if((System.currentTimeMillis() - senbonSakuraT)>SENBONSAKURA_TIMEOUT) 
+        if(timeRemaining > SENBONSAKURA_TIMEOUT) 
         {
+            timeRemaining -= SENBONSAKURA_TIMEOUT;
+            saveTime = timeRemaining;
             x = _x;
             y = _y;
             senbonSakuraC = 40;
@@ -41,13 +47,20 @@ public class SenbonSakura
     
     public void detonateRemote(float _x, float _y)
     {        
-        if((System.currentTimeMillis() - senbonSakuraT)>SENBONSAKURA_TIMEOUT) 
+        if(timeRemaining > 1250) 
         {
+            timeRemaining -= 1250;  
+            saveTime = timeRemaining;
             remoteX = _x;
             remoteY = _y;
             senbonSakuraT = System.currentTimeMillis();
             detonateRemote = true;
             senbonSakuraC = 40;
+            next++;
+            if(next == MAX_REMOTE_SENBON)
+            {
+                next = 0;
+            }
         }         
     }
     
@@ -55,6 +68,7 @@ public class SenbonSakura
     {
         parent.deleteIf(new EnemyPredicate() 
         {
+			@Override
                 public boolean satisfiedBy(Enemy e) 
                 {
                     float p1 = (_x + 5) - e.getX();
@@ -64,7 +78,7 @@ public class SenbonSakura
         });
     }
     
-    public void paint(Graphics g) 
+    public void render(Graphics g) 
     {
         g.setColor(Color.PINK);
         
@@ -105,8 +119,12 @@ public class SenbonSakura
                 g.setColor(Color.PINK);
             }
         }
+        if(timeRemaining < SENBONSAKURA_TIMEOUT)
+        {
+            timeRemaining = (int)(System.currentTimeMillis()-senbonSakuraT) + saveTime;
+        }
         
-        int barWidth = (int)Math.min(SENBONSAKURA_TIMEOUT, System.currentTimeMillis()-senbonSakuraT);
+        int barWidth = (int)Math.min(SENBONSAKURA_TIMEOUT, timeRemaining);
         barWidth *=.05;
         if(playerNumber == 1)
         {
@@ -114,7 +132,8 @@ public class SenbonSakura
         }
         else if(playerNumber == 2)
         {
-            g.fillRect(width-barWidth-100, infoOffset, barWidth, 5);
+            g.fillRect(WIDTH-barWidth-100, infoOffset, barWidth, 5);
         }
     }
 }
+*/
