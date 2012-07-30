@@ -1,11 +1,12 @@
 package insanity;
 
-import insanity.GLMenuItem.Type;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.newdawn.slick.*;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
+import util.GLMenuItem;
+import util.GLMenuItem.Type;
 
 @SuppressWarnings("CallToThreadDumpStack")
 public class Menu extends BasicGameState

@@ -9,16 +9,17 @@ import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import player.MouseControlledPlayer;
 import player.Player;
+import util.QuadTree;
 
 public class Game extends BasicGameState
 {
 	private final int stateID;
-	public static HashSet<Player> players = new HashSet();
-	public static HashSet<Enemy> enemies = new HashSet();
-	private EnemyManager em = new EnemyManager();
-	public static QuadTree<Integer, Enemy> qa = new QuadTree<Integer, Enemy>();
-	//public static QuadTree<Integer, Enemy> qb = new QuadTree<Integer, Enemy>();
+	public static HashSet<Player> players = new HashSet<Player>();
+	public static HashSet<Enemy> enemies = new HashSet<Enemy>();	
     public static HashSet<Enemy> rejects = new HashSet<Enemy>();
+	public static HashSet<Enemy> newcomer = new HashSet<Enemy>(); 
+	public static QuadTree<Integer, Enemy> qa = new QuadTree<Integer, Enemy>();
+	public static QuadTree<Integer, Enemy> qb = new QuadTree<Integer, Enemy>();
 	
 	public Game(final int stateID)
 	{
@@ -34,20 +35,8 @@ public class Game extends BasicGameState
 	@Override
 	public void init(GameContainer container, StateBasedGame game) throws SlickException 
 	{
-		playerSetup();	
-	}
-	
-	@Override
-	public void enter(GameContainer container, StateBasedGame game) throws SlickException
-	{
-		Iterator<Player> i = players.iterator();
-		while(i.hasNext())
-		{
-			Player p = i.next();
-			p.logic();
-		}
-		
-		em.start();
+		playerSetup();
+		EnemyManager.setup();
 	}
 
 	@Override
@@ -76,11 +65,7 @@ public class Game extends BasicGameState
 	{
 		if(container.getInput().isKeyPressed(Input.KEY_ESCAPE)) container.exit();
 		
-		em.manage(container.getFPS());
-		//qa = qb;
-		//qb = new QuadTree<Integer, Enemy>();
-		enemies.removeAll(rejects);
-		rejects.clear();
+		EnemyManager.manage(container.getFPS());
 		
 		Iterator<Player> i = players.iterator();
 		while(i.hasNext())
@@ -93,13 +78,31 @@ public class Game extends BasicGameState
 		while(j.hasNext())
 		{
 			Enemy e = j.next();
-			e.logic(players, delta);
+			e.logic(delta);
 		}
+		
+		qa = qb;
+		qb = new QuadTree<Integer, Enemy>();
+		enemies.removeAll(rejects);
+		enemies.addAll(newcomer);
+		rejects.clear();
+		newcomer.clear();
+	}
+	
+	public void reset()
+	{
+		players.clear();
+		enemies.clear();
+		rejects.clear();
+		newcomer.clear();
+		qa = new QuadTree<Integer, Enemy>();
+		qb = new QuadTree<Integer, Enemy>();
 	}
 	
 	public void playerSetup()
 	{
 		MouseControlledPlayer p1 = new MouseControlledPlayer();		
+		p1.logic();
         players.add(p1);
 	}
 }

@@ -1,4 +1,4 @@
-package insanity;
+package util;
 
 import java.util.LinkedList;
 
@@ -37,17 +37,14 @@ public class QuadTree<Key extends Comparable, Value>
 		}
 		else if(less(x,h.x)&&!less(y,h.y))
 		{
-			System.out.println("a");
 			h.NW = insert(h.NW,x,y,value);
 		}
 		else if(!less(x,h.x)&&less(y,h.y))
 		{
-			System.out.println("b");
 			h.SE = insert(h.SE,x,y,value);
 		}
 		else if(!less(x,h.x)&&!less(y,h.y))
 		{
-			System.out.println("c");
 			h.NE = insert(h.NE,x,y,value);
 		}
 		return h;
@@ -58,15 +55,15 @@ public class QuadTree<Key extends Comparable, Value>
 		return k1.compareTo(k2) < 0;
 	}
 	
-	public LinkedList<Value> query2D(Interval2D<Key> rect)
+	public LinkedList<Value> query2D(Interval2D<Key> rect, Class c)
 	{
-		return query2D(root, rect, new LinkedList<Value>());
+		return query2D(root, rect, new LinkedList<Value>(), c);
 	}
 	
-	private LinkedList<Value> query2D(Node h, Interval2D<Key> rect, LinkedList<Value> l)
+	private LinkedList<Value> query2D(Node h, Interval2D<Key> rect, LinkedList<Value> l, Class c)
 	{
 		if(h==null) return l;
-
+		
 		Key xmin = rect.intervalX.low;
 		Key ymin = rect.intervalY.low;
 		Key xmax = rect.intervalX.high;
@@ -74,23 +71,26 @@ public class QuadTree<Key extends Comparable, Value>
 		
 		if(rect.contains(h.x, h.y))
 		{
-			l.add(h.value);
+			if(c.isInstance(h.value))
+			{
+				l.add(h.value);
+			}
 		}
 		if(less(xmin, h.x)&&less(ymin, h.y))
 		{
-			l = query2D(h.SW, rect, l);
+			l = query2D(h.SW, rect, l, c);
 		}
         if(less(xmin, h.x)&&!less(ymax, h.y))
 		{
-			l = query2D(h.NW, rect, l);
+			l = query2D(h.NW, rect, l, c);
 		}
         if(!less(xmax, h.x)&&less(ymin, h.y))
 		{
-			l = query2D(h.SE, rect, l);
+			l = query2D(h.SE, rect, l, c);
 		}
         if(!less(xmax, h.x)&&!less(ymax, h.y)) 
 		{
-			l = query2D(h.NE, rect, l);
+			l = query2D(h.NE, rect, l, c);
 		}
 		return l;
 	}

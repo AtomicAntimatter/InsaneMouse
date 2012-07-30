@@ -14,12 +14,9 @@ public class MouseControlledPlayer extends Player
 	}
 	
 	@Override
-	public void logic()
+	public void subLogic()
 	{
-		if(!isDead)
-		{
-			loc[0] = Mouse.getX();
-			loc[1] = height - Mouse.getY();
-		}
+		loc[0] = Mouse.getX();
+		loc[1] = height - Mouse.getY();
 	}
 }

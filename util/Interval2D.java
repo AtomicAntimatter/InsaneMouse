@@ -1,4 +1,4 @@
-package insanity;
+package util;
 
 public class Interval2D<Key extends Comparable>
 {

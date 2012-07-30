@@ -1,19 +1,11 @@
 package enemies;
 
-import insanity.Interval;
-import insanity.Interval2D;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import org.newdawn.slick.Color;
 import player.Player;
 
 public final class EnemyTypes 
 {
-    private EnemyTypes() 
-    {
-    }
-
     public static class Circle extends Enemy 
     {
         protected float speed;
@@ -31,24 +23,13 @@ public final class EnemyTypes
         }
 
 		@Override
-        public void logic(HashSet<Player> pl, int delta) 
-        {
-            /*Interval<Integer> intX = new Interval<Integer>((int)loc[0]-1, (int)loc[0]+1);
-            Interval<Integer> intY = new Interval<Integer>((int)loc[1]-1, (int)loc[1]+1);
-            Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
-			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect); 
-			if(!l.isEmpty())
-			{
-				Enemy c = l.removeFirst();
-				insanity.Game.rejects.addAll(l);
-				insanity.Game.qb.insert(c.getLoc()[0], c.getLoc()[1], c);
-			}*/
-			
+        public void subLogic(int delta) 
+        {		
             float dx = Float.MAX_VALUE, d; 
 			
 			Player pm = null;
 			
-            Iterator<Player> i = pl.iterator();
+            Iterator<Player> i = insanity.Game.players.iterator();
             while(i.hasNext()) 
 			{
                 Player p = i.next();
@@ -62,8 +43,8 @@ public final class EnemyTypes
             
             int directionX = 1;
             int directionY = 1;
-            float p1 = (pm.getLoc()[1] - 5) - loc[1];
-            float p2 = (pm.getLoc()[0] - 5) - loc[0];
+            float p1 = pm.getLoc()[1] - loc[1];
+            float p2 = pm.getLoc()[0] - loc[0];
 
             if(p1 < 0) 
             {
@@ -83,38 +64,37 @@ public final class EnemyTypes
             loc[0] += deltaX;
             loc[1] += deltaY;
         }
-
-		@Override
-        public boolean isMortal() 
-        {
-            return true;
-        }
     }
 	
-/*
     public static class Monster extends Enemy 
     {
         protected float speed = 8;
 
+		@Override
         public Color getColor() 
         {
-            return Color.MAGENTA.darker();
+            return Color.magenta.darker();
         }
 
-        public Monster(float _x, float _y, float _speed) 
+        public Monster(int[] mloc, float _speed) 
         {
-            super(_x, _y);
+            super(mloc);
             speed = _speed;
         }
 
-        public void move(List ps, float speedAdjust) 
+		@Override
+        public void subLogic(int delta) 
         {
-            float dx = Float.MAX_VALUE, d = 0; Player pm = null;
-            Iterator i = ps.iterator();
-            while(i.hasNext()) {
+            float dx = Float.MAX_VALUE, d; 
+			Player pm = null;
+            
+			Iterator i = insanity.Game.players.iterator();
+            while(i.hasNext()) 
+			{
                 Player p = (Player)i.next();
-                d = distanceFrom(p.getX(), p.getY());
-                if(d<dx) {
+                d = distanceFrom(p.getLoc());
+                if(d < dx) 
+				{
                     dx = d;
                     pm = p;
                 }
@@ -122,8 +102,8 @@ public final class EnemyTypes
             
             int directionX = 1;
             int directionY = 1;
-            float p1 = (pm.getY() - 5) - y;
-            float p2 = (pm.getX() - 5) - x;
+            float p1 = pm.getLoc()[1] - loc[1];
+            float p2 = pm.getLoc()[0] - loc[0];
 
             if(p1 < 0) 
             {
@@ -139,166 +119,175 @@ public final class EnemyTypes
             float deltaX = speed * (float) Math.abs(Math.cos(angle)) * directionX;
             float deltaY = speed * (float) Math.abs(Math.sin(angle)) * directionY;
 
-            x += deltaX*speedAdjust;
-            y += deltaY*speedAdjust;
+            loc[0] += deltaX*delta;
+            loc[1] += deltaY*delta;
         }
     }
 
     public static class Random extends Enemy 
     {
         private float vx, vy;
-        private int[] borders;
-        private int bounces = 0;
+        protected int bounces = 0;
 
+		@Override
         public Color getColor() 
         {
-            return Color.GREEN;
+            return Color.green;
         }
 
-        public Random(float _x, float _y, float _speed, int[] _borders) 
+        public Random(int[] mloc, float _speed) 
         {
-            super(_x, _y);
+            super(mloc);
             double ang = Math.random() * Math.PI;
             int qx = (Math.random() > .5)? 1: -1;
             int qy = (Math.random() > .5)? 1: -1;
             vx = _speed * qx * (float) Math.abs(Math.cos(ang));
             vy = _speed * qy * (float) Math.abs(Math.sin(ang));
-            
-            borders = _borders;
         }
 
-        public Random(int _x, int _y) 
-        {
-            this(_x, _y, 4, null);
-        }
-
-        public void move(List ps, float speedAdjust)
+		@Override
+        public void subLogic(int delta)
         {     
-            if(x > borders[2])
+            if(loc[0] > BORDER[2])
             {                
                 vx = Math.abs(vx)*-1;
                 bounces++;
             }
-            if(x < borders[0])
+            if(loc[0] < BORDER[0])
             {
             	vx = Math.abs(vx);
                 bounces++;
             }
-            if(y > borders[3])
+            if(loc[1] > BORDER[3])
             {                
                 vy = Math.abs(vy)*-1;
                 bounces++;
             }
-            if(y < borders[1])
+            if(loc[1] < BORDER[1])
             {
             	vy = Math.abs(vy);
                 bounces++;
             }
             
-            x += vx*speedAdjust;
-            y += vy*speedAdjust;
-        }
-        
-        public int getBounces()
-        {
-            return bounces;
+            loc[0] += vx*delta;
+            loc[1] += vy*delta;
         }
     }
 
     public static class Rain extends Enemy 
     {
         private float vx, vy;
-        private int floor;
+		private final int OFFSET;
 
+		@Override
         public Color getColor() 
         {
-            return Color.YELLOW;
+            return Color.yellow;
         }
         
-        public Rain(float _x, float _y, float _speed, int _floor) 
+        public Rain(int[] mloc, float _speed) 
         {
-            super(_x, _y);
-            floor = _floor;
+            super(mloc);
             vx = -_speed;
             vy = _speed;
+			
+			if(mloc[0] < BORDER[3])
+			{
+				OFFSET = BORDER[2];
+			}
+			else
+			{
+				OFFSET = 0;
+			}
         }
 
-        public Rain(int _x, int _y, int _floor) 
+		@Override
+        public void subLogic(int delta) 
         {
-            this(_x, _y, (float)2.4, _floor);
-        }
-
-        public void move(List ps, float speedAdjust) 
-        {
-            x += vx*speedAdjust*0.2;
-            y += vy*speedAdjust*0.2;
-            if(y > floor)
+            loc[0] += vx*delta;
+            loc[1] += vy*delta;
+            if(loc[1] > BORDER[3])
             {
-                x = x+y;
-                y = 0;
+                loc[0] = loc[0]+loc[1]-OFFSET;
+                loc[1] = 0;
             }
+			if(loc[0] < BORDER[0])
+			{
+				loc[0] = BORDER[2];
+			}
         }
     }
     
-    public static class Bomb extends Monster {
-        private SetCallback mod;
-        private int[] borders;
+    public static class Bomb extends Monster 
+	{
         private static final int PIECES = 50;
-        private boolean existant = true;
+		private static final int MAX_DISTANCE = 8000;
         
-        public Color getColor() {
-            return Color.BLUE;
+		@Override
+        public Color getColor() 
+		{
+            return Color.blue;
         }
         
-        public Bomb (float _x, float _y, float _speed, int[] _borders, SetCallback _mod) {
-            super(_x, _y, _speed);
-            mod = _mod;
-            borders = _borders;
+        public Bomb(int[] mloc, float _speed) 
+		{
+            super(mloc, _speed);
         }
         
-        public void move(List ps, float speedAdjust) {
-            if (existant) {
-                super.move(ps, speedAdjust);
-                float dx = Float.MAX_VALUE, d = 0;
-                Iterator i = ps.iterator();
-                while (i.hasNext()) {
-                    Player p = (Player) i.next();
-                    d = distanceFrom(p.getX(), p.getY());
-                    if (d < dx) {
-                        dx = d;
-                    }
-                }
-                if (dx < 8000) {
-                    for (int j = 0; j < PIECES; j++) {
-                        mod.add(new Shrapnel(x, y, speed, borders));
-                    }
-                    existant = false;
-                }
-            }
-        }
-        
-        public boolean isMortal() {
-            return !existant;
-        }
-        
-        public void paint(Graphics g) {
-            if(existant)
-                super.paint(g);
-        }
-        
-        public boolean collidesWith(int mx, int my) {
-            return existant && super.collidesWith(mx, my);
+		@Override
+        public void subLogic(int delta) 
+		{
+			super.subLogic(delta);
+
+			float dx = Float.MAX_VALUE, d;
+			Iterator<Player> i = insanity.Game.players.iterator();
+			while (i.hasNext()) 
+			{
+				Player p = (Player) i.next();
+				d = distanceFrom(p.getLoc());
+				if(d < dx) 
+				{
+					dx = d;
+				}
+			}
+
+			if (dx < MAX_DISTANCE) 
+			{
+				int[] mloc = {(int)loc[0],(int)loc[1]};
+				for (int j = 0; j < PIECES; j++) 
+				{
+					Shrapnel s = new Shrapnel(mloc, speed);
+					insanity.Game.newcomer.add(s);
+					insanity.Game.qb.insert(mloc[0], mloc[1], s);
+				}
+				isDead = true;
+				insanity.Game.rejects.add(this);
+			}
         }
     }
     
-    public static class Shrapnel extends Random {
-        
-        public Shrapnel(float _x, float _y, float _speed, int[] _borders) {
-            super(_x, _y, _speed, _borders);
+    public static class Shrapnel extends Random 
+	{    
+        public Shrapnel(int[] mloc, float _speed) 
+		{
+            super(mloc, _speed);
         }
         
-        public Color getColor() {
-            return Color.CYAN;
-        }         
-    }*/
+		@Override
+        public Color getColor() 
+		{
+            return Color.cyan;
+        }   
+		
+		@Override
+		public void subLogic(int delta)
+		{
+			super.subLogic(delta);
+			if(bounces > 2)
+			{
+				isDead = true;
+				insanity.Game.rejects.add(this);
+			}
+		}
+    }
 }

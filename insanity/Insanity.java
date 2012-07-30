@@ -13,10 +13,6 @@ public class Insanity extends StateBasedGame
 	public Insanity()
 	{
 		super("Insanity");
-		
-		this.addState(new Menu(MAINMENUSTATE));
-		this.addState(new Game(GAMEPLAYSTATE));
-		this.enterState(MAINMENUSTATE);
 	}
 	
 	@SuppressWarnings("CallToThreadDumpStack")
@@ -31,7 +27,7 @@ public class Insanity extends StateBasedGame
 	@Override
 	public void initStatesList(GameContainer container) throws SlickException 
 	{
-		this.getState(MAINMENUSTATE).init(container, this);
-		this.getState(GAMEPLAYSTATE).init(container, this);
+		addState(new Menu(MAINMENUSTATE));
+		addState(new Game(GAMEPLAYSTATE));
 	}
 }
