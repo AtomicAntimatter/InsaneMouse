@@ -18,5 +18,10 @@ public class MouseControlledPlayer extends Player
 	{
 		loc[0] = Mouse.getX();
 		loc[1] = height - Mouse.getY();
+		
+		if(Mouse.isButtonDown(0))
+		{
+			s.detonateLocal(loc);
+		}
 	}
 }

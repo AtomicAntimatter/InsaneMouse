@@ -23,8 +23,8 @@ public class EnemyManager
 	{
 		try
 		{
-			newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED, 500, 
-				EnemyTypes.Monster.class.getConstructor(int[].class,float.class));
+			newEnemies(SpawnType.CEILING, 25, RAINSPEED, 500, 
+				EnemyTypes.Rain.class.getConstructor(int[].class,float.class));
 		}catch(Exception e)
 		{
 			e.printStackTrace();

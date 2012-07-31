@@ -38,6 +38,18 @@ public class Game extends BasicGameState
 		playerSetup();
 		EnemyManager.setup();
 	}
+	
+	@Override
+	public void enter(GameContainer container, StateBasedGame game) throws SlickException 
+	{
+		container.setMouseGrabbed(true);
+	}
+	
+	@Override
+	public void leave(GameContainer container, StateBasedGame game) throws SlickException 
+	{
+		container.setMouseGrabbed(false);
+	}
 
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException 

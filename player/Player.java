@@ -1,7 +1,6 @@
 package player;
 
 import enemies.Enemy;
-import enemies.EnemyTypes;
 import java.util.LinkedList;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -11,10 +10,11 @@ import util.Interval2D;
 public abstract class Player 
 {
     private static final int IMMUNITY_LIFETIME = 2000;
-    private int lives = 3;
+    private int lives = 100;
     private boolean isDead, isImmune;
     private long lastImmunity = 0;
     protected int[] loc = new int[2];
+	protected SenbonSakura s = new SenbonSakura();
 
     public int[] getLoc() 
     {
@@ -46,7 +46,7 @@ public abstract class Player
 			Interval<Integer> intX = new Interval<Integer>((int)loc[0]-25, (int)loc[0]+25);
 			Interval<Integer> intY = new Interval<Integer>((int)loc[1]-25, (int)loc[1]+25);
 			Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
-			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, EnemyTypes.Monster.class); 
+			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, Enemy.class); 
 			if(!l.isEmpty())
 			{
 				for(int i = 0; i < l.size(); i++)
@@ -69,6 +69,7 @@ public abstract class Player
 			}
 		}
 		subLogic();
+		s.logic();
 	}
 	
     public abstract void subLogic();
@@ -91,5 +92,7 @@ public abstract class Player
 			g.setColor(Color.red);
 			g.drawOval(loc[0] - 15, loc[1] - 15, 30, 30);
 		}
+		
+		s.render(g);
     }
 }
