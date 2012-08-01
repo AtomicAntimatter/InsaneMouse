@@ -4,11 +4,15 @@ import enemies.Enemy;
 import enemies.EnemyManager;
 import java.util.HashSet;
 import java.util.Iterator;
-import org.newdawn.slick.*;
+import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
+import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 import player.MouseControlledPlayer;
 import player.Player;
+import player.PlayerHUD;
 import util.QuadTree;
 
 public class Game extends BasicGameState
@@ -37,6 +41,7 @@ public class Game extends BasicGameState
 	{
 		playerSetup();
 		EnemyManager.setup();
+		PlayerHUD.setup(container);
 	}
 	
 	@Override
@@ -53,10 +58,7 @@ public class Game extends BasicGameState
 
 	@Override
 	public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException 
-	{
-		g.setColor(Color.white);
-		g.drawString(String.valueOf(enemies.size()), 500, 20);
-		
+	{			
 		Iterator<Player> i = players.iterator();
 		while(i.hasNext())
 		{
@@ -70,6 +72,8 @@ public class Game extends BasicGameState
 			Enemy e = j.next();
 			e.render(g);
 		}
+		
+		PlayerHUD.render(g);
 	}
 
 	@Override
@@ -83,7 +87,7 @@ public class Game extends BasicGameState
 		while(i.hasNext())
 		{
 			Player p = i.next();
-			p.logic();
+			p.logic(container.getInput());
 		}
 		
 		Iterator<Enemy> j = enemies.iterator();
@@ -113,8 +117,7 @@ public class Game extends BasicGameState
 	
 	public void playerSetup()
 	{
-		MouseControlledPlayer p1 = new MouseControlledPlayer();		
-		p1.logic();
+		MouseControlledPlayer p1 = new MouseControlledPlayer("Atomic", 0);		
         players.add(p1);
 	}
 }

@@ -1,6 +1,8 @@
 package player;
 
 import enemies.Enemy;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -11,69 +13,161 @@ public class SenbonSakura
 {
     private static final int 
             SBSK_R = 150,
-			SBSK_S = SBSK_R*SBSK_R,
-            SBSK_T = 5000;
+            SBSK_LT = 5000,
+			SBSK_RT = 3000;
+
+	public SBSK_Timer st = new SBSK_Timer();
+	private HashSet<SBSK_Bomb> bSet = new HashSet<SBSK_Bomb>();
+		
+	public class SBSK_Timer
+	{
+		public static final long MAX_RESERVOIR = 10000;
+		private long currentReservoir = MAX_RESERVOIR;
+		private long lastTransaction = 0;
+		
+		public boolean transact(long amount)
+		{
+			long t = System.currentTimeMillis() - lastTransaction + currentReservoir;
+			currentReservoir = Math.min(t, MAX_RESERVOIR);
+			
+			if(currentReservoir - amount < 0)
+			{
+				return false;
+			}
+			
+			lastTransaction = System.currentTimeMillis();
+			currentReservoir -= amount;
+			return true;
+		}
+		
+		public long getReservoir()
+		{
+			long t = System.currentTimeMillis() - lastTransaction + currentReservoir;
+			currentReservoir = Math.min(t, MAX_RESERVOIR);
+			lastTransaction = System.currentTimeMillis();
+			return currentReservoir;
+		}
+	}
 	
-	private int[] loc = {0,0};
-    private long senbonSakuraT = 0;
-	private int senbonSakuraC = 0;
-	private boolean detonate, detonateLocal;
-    
-    public void detonateLocal(int[] _loc)
-    {     
-        if(senbonSakuraT + SBSK_T < System.currentTimeMillis()) 
-        {
+	public class SBSK_Bomb
+	{
+		private final boolean remote;
+		private final int[] loc;
+		private final long startTime, delayTime;
+		private final long drawTime = 100;
+		private boolean removed, detonated;
+		
+		public SBSK_Bomb(int[] _loc, boolean _remote)
+		{
+			remote = _remote;
 			loc = _loc;
-            senbonSakuraC = 40;
-            senbonSakuraT = System.currentTimeMillis();
-            detonateLocal = true;
-			detonate = true;
+			startTime = System.currentTimeMillis();
+			
+			if(remote)
+			{
+				delayTime = 2000;
+			}
+			else
+			{
+				delayTime = 0;
+			}
+		}
+		
+		public boolean isExplodeTime()
+		{
+			if(startTime + delayTime < System.currentTimeMillis())
+			{	
+				return true;
+			}
+			return false;
+		}
+		
+		public boolean isDrawTime()
+		{
+			if(System.currentTimeMillis() < startTime + delayTime + drawTime)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public int distanceFrom(int[] mloc)
+		{
+			int p1 = loc[0]-mloc[0];
+			int p2 = loc[1]-mloc[1];
+			return (int)Math.pow(p2, 2) + (int)Math.pow(p1, 2);
+		}
+	}
+	
+	public void addBomb(int[] loc, boolean remote)
+    {     
+        if(st.transact(remote?SBSK_RT:SBSK_LT))
+        {
+			SBSK_Bomb b = new SBSK_Bomb(loc.clone(), remote);	
+			bSet.add(b);
         }
     }
 	
-	private int distanceFrom(int[] mloc)
-	{
-		int p1 = loc[0]-mloc[0];
-		int p2 = loc[1]-mloc[1];
-		return (int)Math.pow(p2, 2) + (int)Math.pow(p1, 2);
-	}
-    
     public void logic()
     {
-		if(detonate)
+		HashSet<SBSK_Bomb> deadBombs = new HashSet<SBSK_Bomb>();
+		
+		Iterator<SBSK_Bomb> i = bSet.iterator();
+		while(i.hasNext())
 		{
-			Interval<Integer> intX = new Interval<Integer>((int)loc[0]-SBSK_R, (int)loc[0]+SBSK_R);
-			Interval<Integer> intY = new Interval<Integer>((int)loc[1]-SBSK_R, (int)loc[1]+SBSK_R);
-			Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
-			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, Enemy.class); 
-			if(!l.isEmpty())
+			SBSK_Bomb b = i.next();
+			
+			if(b.detonated)
 			{
-				for(int i = 0; i < l.size(); i++)
-				{
-					Enemy e = l.get(i);
-					if(distanceFrom(e.getLoc()) < SBSK_S)
-					{	
-						insanity.Game.rejects.add(e);
-					}
-				}		
+				deadBombs.add(b);
+				continue;
 			}
-			detonate = false;
+			
+			if(!b.removed&&b.isExplodeTime())
+			{
+				Interval<Integer> intX = new Interval<Integer>(b.loc[0]-SBSK_R, b.loc[0]+SBSK_R);
+				Interval<Integer> intY = new Interval<Integer>(b.loc[1]-SBSK_R, b.loc[1]+SBSK_R);
+				Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
+				LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, Enemy.class); 
+				if(!l.isEmpty())
+				{
+					for(int j = 0; j < l.size(); j++)
+					{
+						Enemy e = l.get(j);
+						if(b.distanceFrom(e.getLoc()) < SBSK_R*SBSK_R)
+						{	
+							insanity.Game.rejects.add(e);
+						}
+					}		
+				}
+				b.removed = true;
+			}
 		}
+		
+		bSet.removeAll(deadBombs);
     }
     
     public void render(Graphics g) 
     { 
-        if(detonateLocal)
-        {
-			g.setColor(Color.pink);
-            if(senbonSakuraC-- > 0) 
-            {
-                g.fillOval(loc[0]-SBSK_R, loc[1]-SBSK_R, 2*SBSK_R, 2*SBSK_R);
-            }
-            else
-            {
-                detonateLocal = false;
-            }
-        }
+		g.setColor(Color.pink);
+		
+		Iterator<SBSK_Bomb> i = bSet.iterator();
+		while(i.hasNext())
+		{
+			SBSK_Bomb b = i.next();
+			
+			if(b.removed&&b.isDrawTime())
+			{
+				g.fillOval(b.loc[0]-SBSK_R, b.loc[1]-SBSK_R, 2*SBSK_R, 2*SBSK_R);
+			}
+			else if(b.isDrawTime())
+			{
+				g.fillOval(b.loc[0]-5, b.loc[1]-5, 10, 10);
+			}
+			else
+			{
+				b.detonated = true;
+			}
+		}
     }
 }

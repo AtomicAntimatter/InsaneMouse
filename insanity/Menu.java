@@ -45,10 +45,10 @@ public class Menu extends BasicGameState
 		int menuX = container.getWidth()/2 - buttonIMG.getWidth()/2;
 		int menuY = container.getHeight()/2;
 		
-		addButton(menuX, menuY-180, 1, Type.PLAY);
-		addButton(menuX, menuY-90, 2, Type.SETTINGS);
-		addButton(menuX, menuY, 3, Type.HOWTO);
-		addButton(menuX, menuY+90, 4, Type.QUIT);
+		addButton(menuX, menuY-90, 1, Type.PLAY);
+		addButton(menuX, menuY, 2, Type.SETTINGS);
+		addButton(menuX, menuY+90, 3, Type.HOWTO);
+		addButton(menuX, menuY+180, 4, Type.QUIT);
 	}
 
 	@Override
