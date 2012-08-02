@@ -2,29 +2,35 @@ package enemies;
 
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
+import java.util.LinkedList;
 import org.lwjgl.opengl.Display;
 import player.Player;
 
 public class EnemyManager
 {
-	private static final int REFRESH_TIME = 10000, ADD_TIME = 500, FPS_MIN = 80;
+	private static final int REFRESH_TIME = 10000, ADD_TIME = 1000;
 	private static long lastRefresh = 0, lastAdd = 0;
 	private static enum SpawnType{CIRCLE,CEILING,FLOOR,LEFT,RIGHT,RANDOM};
 	
 	private static final float CIRCLESPEED = 0.000002f;
-	private static final float MONSTERSPEED = 0.1f;
+	private static final float MONSTERSPEED = 0.2f;
 	private static final float RANDOMSPEED = 0.1f;
 	private static final float RAINSPEED = 0.1f;
 	private static final float BOMBSPEED = 0.5f;
 	private static final int DISTANCE = 500;
+	
+	public static int FPS = 0;
+	public static final int FPS_MIN = 80;
+	
+	public static LinkedList<EnemyTypes.Boss> bossList = new LinkedList();
 	
 	@SuppressWarnings("CallToThreadDumpStack")
 	public static void setup()
 	{
 		try
 		{
-			newEnemies(SpawnType.CEILING, 25, RAINSPEED, 500, 
-				EnemyTypes.Rain.class.getConstructor(int[].class,float.class));
+			newEnemies(SpawnType.RANDOM, 1, MONSTERSPEED, 500, 
+				EnemyTypes.Boss.class.getConstructor(int[].class,float.class));
 		}catch(Exception e)
 		{
 			e.printStackTrace();
@@ -32,24 +38,26 @@ public class EnemyManager
 	}
 	
 	@SuppressWarnings("CallToThreadDumpStack")
-	public static void manage(final int FPS)
+	public static void manage(final int _FPS)
 	{
-		/*
+		FPS = _FPS; 
+
 		if(FPS > FPS_MIN)
 		{
 			try
 			{
+				/*
 				if(System.currentTimeMillis() - lastRefresh > REFRESH_TIME)
 				{
 					insanity.Game.enemies.clear();
 					lastRefresh = System.currentTimeMillis();
-				}
+				}*/
 				
 				if(System.currentTimeMillis() - lastAdd > ADD_TIME)
 				{					
 					newEnemies(SpawnType.RANDOM, 1, CIRCLESPEED, 500, 
 						EnemyTypes.Circle.class.getConstructor(int[].class,float.class));
-					
+					/*
 					newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED, 500, 
 						EnemyTypes.Monster.class.getConstructor(int[].class,float.class));
 					
@@ -61,7 +69,7 @@ public class EnemyManager
 					
 					newEnemies(SpawnType.RANDOM, 1, 0.5f, 500, 
 						EnemyTypes.Bomb.class.getConstructor(int[].class,float.class));
-					
+					*/
 					lastAdd = System.currentTimeMillis();
 				}
 			}catch(Exception e)
@@ -69,7 +77,6 @@ public class EnemyManager
 				e.printStackTrace();
 			}
 		}
-		*/
 	}
 	
 	@SuppressWarnings("CallToThreadDumpStack")

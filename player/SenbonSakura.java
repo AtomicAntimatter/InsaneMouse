@@ -1,6 +1,8 @@
 package player;
 
 import enemies.Enemy;
+import enemies.EnemyManager;
+import enemies.EnemyTypes;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -134,9 +136,22 @@ public class SenbonSakura
 					for(int j = 0; j < l.size(); j++)
 					{
 						Enemy e = l.get(j);
-						if(b.distanceFrom(e.getLoc()) < SBSK_R*SBSK_R)
+						if(!EnemyTypes.Boss.class.isInstance(e)&&
+							b.distanceFrom(e.getLoc()) < SBSK_R*SBSK_R)
 						{	
 							insanity.Game.rejects.add(e);
+						}
+						else if(EnemyTypes.Boss.class.isInstance(e))
+						{
+							EnemyTypes.Boss be = (EnemyTypes.Boss)e;
+							be.health -= 20;
+							be.size = Math.max(20, be.size-10);
+							
+							if(be.health <= 0)
+							{
+								insanity.Game.rejects.add(e);
+								EnemyManager.bossList.remove(be);
+							}
 						}
 					}		
 				}
