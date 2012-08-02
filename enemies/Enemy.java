@@ -1,6 +1,5 @@
 package enemies;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.Color;
@@ -38,39 +37,20 @@ public abstract class Enemy
 		
 		if(creationTime+breatheTime<System.currentTimeMillis())
 		{
-			Interval<Integer> intX = new Interval<Integer>((int)loc[0]-size/2, (int)loc[0]+size/2);
-			Interval<Integer> intY = new Interval<Integer>((int)loc[1]-size/2, (int)loc[1]+size/2);
+			Interval<Integer> intX = new Interval<Integer>((int)loc[0]-1, (int)loc[0]+1);
+			Interval<Integer> intY = new Interval<Integer>((int)loc[1]-1, (int)loc[1]+1);
 			Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
 			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, this.getClass()); 
 			if(!l.isEmpty())
 			{
-				boolean noBoss = true;
-				for(int i = 0; i < l.size(); i++)
-				{
-					Enemy e = l.get(i);
-					
-					if(EnemyTypes.Boss.class.isInstance(e))
-					{
-						EnemyTypes.Boss be = (EnemyTypes.Boss)e;
-						be.size += 10*l.size()-10;
-						
-						if(!EnemyTypes.Boss.class.isInstance(this)&&noBoss)
-						{
-							insanity.Game.rejects.add(this);
-						}
-						
-						noBoss = false;
-						l.remove(e);
-					}
-				}
-				if(noBoss)
+				if(l.contains(this))
 				{
 					l.remove(this);
-				}
+				}	
 				insanity.Game.rejects.addAll(l);
 			}
 		}
-		if(EnemyManager.bossList.isEmpty()||bossMinion)
+		if(!EnemyManager.bossActive||bossMinion)
 		{
 			subLogic(delta);
 		}
@@ -78,7 +58,7 @@ public abstract class Enemy
 		{
 			minionLogic(delta);
 		}
-		
+
 		if(!isDead)
 		{
 			insanity.Game.qb.insert((int)loc[0],(int)loc[1], this);
@@ -87,24 +67,9 @@ public abstract class Enemy
 	
 	public void minionLogic(int delta)
 	{	
-		float dx = Float.MAX_VALUE, d; 
-		EnemyTypes.Boss be = null;
-
-		Iterator<EnemyTypes.Boss> i = EnemyManager.bossList.iterator();
-		while(i.hasNext()) 
-		{
-			EnemyTypes.Boss b = i.next();
-			d = distanceFrom(b.getLoc());
-			if(d < dx) 
-			{
-				dx = d;
-				be = b;
-			}
-		}
-		
-		Vector2f a = new Vector2f(be.loc[0] - loc[0], be.loc[1] - loc[1]);
+		Vector2f a = new Vector2f(EnemyManager.boss.loc[0] - loc[0], EnemyManager.boss.loc[1] - loc[1]);
 		v.add(a);
-		v.scale(0.5f/v.length());
+		v.scale(1/v.length());
 
 		loc[0] += v.x*delta;
 		loc[1] += v.y*delta;

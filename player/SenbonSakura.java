@@ -2,7 +2,6 @@ package player;
 
 import enemies.Enemy;
 import enemies.EnemyManager;
-import enemies.EnemyTypes;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -92,13 +91,6 @@ public class SenbonSakura
 			}
 			return false;
 		}
-		
-		public int distanceFrom(int[] mloc)
-		{
-			int p1 = loc[0]-mloc[0];
-			int p2 = loc[1]-mloc[1];
-			return (int)Math.pow(p2, 2) + (int)Math.pow(p1, 2);
-		}
 	}
 	
 	public void addBomb(int[] loc, boolean remote)
@@ -133,32 +125,22 @@ public class SenbonSakura
 				LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, Enemy.class); 
 				if(!l.isEmpty())
 				{
-					for(int j = 0; j < l.size(); j++)
+					if(l.contains(EnemyManager.boss))
 					{
-						Enemy e = l.get(j);
-						if(!EnemyTypes.Boss.class.isInstance(e)&&
-							b.distanceFrom(e.getLoc()) < SBSK_R*SBSK_R)
-						{	
-							insanity.Game.rejects.add(e);
-						}
-						else if(EnemyTypes.Boss.class.isInstance(e))
+						EnemyManager.boss.health -= 20;
+						EnemyManager.boss.size = Math.max(20, EnemyManager.boss.size-10);
+						l.remove(EnemyManager.boss);
+						
+						if(EnemyManager.boss.health <= 0)
 						{
-							EnemyTypes.Boss be = (EnemyTypes.Boss)e;
-							be.health -= 20;
-							be.size = Math.max(20, be.size-10);
-							
-							if(be.health <= 0)
-							{
-								insanity.Game.rejects.add(e);
-								EnemyManager.bossList.remove(be);
-							}
+							insanity.Game.rejects.add(EnemyManager.boss);
 						}
 					}		
+					insanity.Game.rejects.addAll(l);
 				}
 				b.removed = true;
 			}
 		}
-		
 		bSet.removeAll(deadBombs);
     }
     

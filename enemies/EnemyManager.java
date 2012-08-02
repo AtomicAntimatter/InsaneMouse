@@ -1,8 +1,8 @@
 package enemies;
 
+import enemies.EnemyTypes.*;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
-import java.util.LinkedList;
 import org.lwjgl.opengl.Display;
 import player.Player;
 
@@ -22,65 +22,59 @@ public class EnemyManager
 	public static int FPS = 0;
 	public static final int FPS_MIN = 80;
 	
-	public static LinkedList<EnemyTypes.Boss> bossList = new LinkedList();
-	
+	public static boolean bossActive;
+	public static Boss boss;
+		
 	@SuppressWarnings("CallToThreadDumpStack")
 	public static void setup()
 	{
-		try
-		{
-			newEnemies(SpawnType.RANDOM, 1, MONSTERSPEED, 500, 
-				EnemyTypes.Boss.class.getConstructor(int[].class,float.class));
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+		spawnBoss(MONSTERSPEED);
+		bossActive = true;
 	}
 	
 	@SuppressWarnings("CallToThreadDumpStack")
 	public static void manage(final int _FPS)
 	{
 		FPS = _FPS; 
-
+		/*
 		if(FPS > FPS_MIN)
 		{
 			try
-			{
-				/*
+			{			
 				if(System.currentTimeMillis() - lastRefresh > REFRESH_TIME)
 				{
 					insanity.Game.enemies.clear();
 					lastRefresh = System.currentTimeMillis();
-				}*/
+				}
 				
 				if(System.currentTimeMillis() - lastAdd > ADD_TIME)
-				{					
-					newEnemies(SpawnType.RANDOM, 1, CIRCLESPEED, 500, 
-						EnemyTypes.Circle.class.getConstructor(int[].class,float.class));
-					/*
-					newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED, 500, 
-						EnemyTypes.Monster.class.getConstructor(int[].class,float.class));
+				{							
+					newEnemies(SpawnType.RANDOM, 1, CIRCLESPEED,
+						Circle.class.getConstructor(int[].class,float.class));
 					
-					newEnemies(SpawnType.RANDOM, 25, RANDOMSPEED, 500, 
-						EnemyTypes.Random.class.getConstructor(int[].class,float.class));
+					newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED, 
+						Monster.class.getConstructor(int[].class,float.class));
 					
-					newEnemies(SpawnType.RANDOM, 25, 0.1f, 500, 
-						EnemyTypes.Rain.class.getConstructor(int[].class,float.class));
+					newEnemies(SpawnType.RANDOM, 25, RANDOMSPEED, 
+						Random.class.getConstructor(int[].class,float.class));
 					
-					newEnemies(SpawnType.RANDOM, 1, 0.5f, 500, 
-						EnemyTypes.Bomb.class.getConstructor(int[].class,float.class));
-					*/
+					newEnemies(SpawnType.RANDOM, 25, RAINSPEED, 
+						Rain.class.getConstructor(int[].class,float.class));
+					
+					newEnemies(SpawnType.RANDOM, 1, BOMBSPEED, 
+						Bomb.class.getConstructor(int[].class,float.class));
+					
 					lastAdd = System.currentTimeMillis();
 				}
 			}catch(Exception e)
 			{
 				e.printStackTrace();
 			}
-		}
+		}*/
 	}
 	
 	@SuppressWarnings("CallToThreadDumpStack")
-	private static void newEnemies(SpawnType s, int enemyNum, float enemySpeed, int distance, Constructor c)
+	private static void newEnemies(SpawnType s, int enemyNum, float enemySpeed, Constructor c)
 	{	
 		try
 		{
@@ -94,8 +88,8 @@ public class EnemyManager
 						for(int i = 0; i < enemyNum/insanity.Game.players.size(); i++) 
 						{
 							double degree = 2*Math.PI/enemyNum;
-							int x = (int)(p.getLoc()[0] + distance * (float) Math.sin(degree * i));
-							int y = (int)(p.getLoc()[1] + distance * (float) Math.cos(degree * i));
+							int x = (int)(p.getLoc()[0] + DISTANCE * (float) Math.sin(degree * i));
+							int y = (int)(p.getLoc()[1] + DISTANCE * (float) Math.cos(degree * i));
 							int[] mloc = {x,y};
 							Enemy e = (Enemy)c.newInstance(mloc, enemySpeed);
 							insanity.Game.qa.insert(mloc[0], mloc[1], e);
@@ -131,23 +125,28 @@ public class EnemyManager
 				case RIGHT:
 					break;
 				case RANDOM:
-					Iterator<Player> ite = insanity.Game.players.iterator();
-					while(ite.hasNext())
+					for(int i = 0; i < enemyNum; i++) 
 					{
-						Player p = ite.next();
-						for(int i = 0; i < enemyNum/insanity.Game.players.size(); i++)
+						boolean satisfySpawn = false;
+						int[] mloc = new int[2];
+						while(!satisfySpawn)
 						{
-							int[] mloc = new int[2];
-							do
+							satisfySpawn = true;
+							mloc[0] = (int)(Math.random()*Display.getWidth());
+							mloc[1] = (int)(Math.random()*Display.getHeight());
+							Iterator<Player> ite = insanity.Game.players.iterator();
+							while(ite.hasNext())
 							{
-								mloc[0] = (int)(Math.random()*Display.getWidth());
-								mloc[1] = (int)(Math.random()*Display.getHeight());
-							}while(p.distanceFrom(mloc) < distance);
-							
-							Enemy e = (Enemy)c.newInstance(mloc, enemySpeed);
-							insanity.Game.qa.insert(mloc[0], mloc[1], e);
-							insanity.Game.enemies.add(e);
+								if(ite.next().distanceFrom(mloc) < DISTANCE)
+								{
+									satisfySpawn = false;
+								}	
+							}
 						}
+
+						Enemy e = (Enemy)c.newInstance(mloc, enemySpeed);
+						insanity.Game.qa.insert(mloc[0], mloc[1], e);
+						insanity.Game.enemies.add(e);
 					}
 					break;
 			}
@@ -155,5 +154,29 @@ public class EnemyManager
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private static void spawnBoss(float enemySpeed)
+	{
+		boolean satisfySpawn = false;
+		int[] mloc = new int[2];
+		while(!satisfySpawn)
+		{
+			satisfySpawn = true;
+			mloc[0] = (int)(Math.random()*Display.getWidth());
+			mloc[1] = (int)(Math.random()*Display.getHeight());
+			Iterator<Player> ite = insanity.Game.players.iterator();
+			while(ite.hasNext())
+			{
+				if(ite.next().distanceFrom(mloc) < DISTANCE)
+				{
+					satisfySpawn = false;
+				}	
+			}
+		}
+
+		boss = new Boss(mloc, enemySpeed);
+		insanity.Game.qa.insert(mloc[0], mloc[1], boss);
+		insanity.Game.enemies.add(boss);
 	}
 }

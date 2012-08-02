@@ -1,6 +1,7 @@
 package player;
 
 import enemies.Enemy;
+import enemies.EnemyManager;
 import java.util.LinkedList;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
@@ -52,29 +53,26 @@ public abstract class Player
 		
 		if(!isImmune())
 		{
-			Interval<Integer> intX = new Interval<Integer>((int)loc[0]-25, (int)loc[0]+25);
-			Interval<Integer> intY = new Interval<Integer>((int)loc[1]-25, (int)loc[1]+25);
+			Interval<Integer> intX = new Interval<Integer>((int)loc[0]-5, (int)loc[0]+5);
+			Interval<Integer> intY = new Interval<Integer>((int)loc[1]-5, (int)loc[1]+5);
 			Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
 			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, Enemy.class); 
 			if(!l.isEmpty())
 			{
-				for(int i = 0; i < l.size(); i++)
+				if(l.contains(EnemyManager.boss))
 				{
-					Enemy e = l.get(i);
-					if(distanceFrom(e.getLoc()) < 25)
-					{
-						lives--;	
-						isImmune = true;
-						lastImmunity = System.currentTimeMillis();	
-						insanity.Game.rejects.add(e);
-						
-						if(lives == 0)
-						{
-							isDead = true;
-						}
-						break;
-					}
-				}	
+					l.remove(EnemyManager.boss);
+				}
+				
+				lives--;	
+				isImmune = true;
+				lastImmunity = System.currentTimeMillis();	
+				insanity.Game.rejects.addAll(l);
+
+				if(lives == 0)
+				{
+					isDead = true;
+				}						
 			}
 		}
 		subLogic(m);

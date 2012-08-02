@@ -102,8 +102,26 @@ public final class EnemyTypes
 				Vector2f a = new Vector2f(pm.getLoc()[0] - loc[0], pm.getLoc()[1] - loc[1]);
 				a.scale(turnspeed);
 				v.add(a);
+					
+				if(loc[0] > BORDER[2])
+				{                
+					v.add(new Vector2f(-2*Math.abs(v.x),0));
+				}
+				if(loc[0] < BORDER[0])
+				{                
+					v.add(new Vector2f(2*Math.abs(v.x),0));
+				}
+				if(loc[1] > BORDER[3])
+				{                
+					v.add(new Vector2f(0,-2*Math.abs(v.y)));
+				}
+				if(loc[1] < BORDER[1])
+				{                
+					v.add(new Vector2f(0,2*Math.abs(v.y)));
+				}
+				
 				v.scale(SPEED/v.length());
-			
+				
 				loc[0] += v.x*delta;
 				loc[1] += v.y*delta;
 			}
@@ -259,7 +277,6 @@ public final class EnemyTypes
 		{
 			super(mloc, _speed);
 			bossMinion = true;
-			EnemyManager.bossList.add(this);
 			c = Color.cyan.darker(0.6f);
 			size = 20;
 		}
@@ -287,7 +304,6 @@ public final class EnemyTypes
 						m.size = 5;
 						m.bossMinion = true;
 						insanity.Game.newcomer.add(m);
-						insanity.Game.qb.insert(mloc[0], mloc[1], m);
 					}
 				}
 				if(lastShoot + shootDelay < System.currentTimeMillis())
@@ -317,7 +333,6 @@ public final class EnemyTypes
 					r.v.scale(SHOOTSPEED/r.v.length());
 					
 					insanity.Game.newcomer.add(r);
-					insanity.Game.qb.insert(mloc[0], mloc[1], r);
 				}
 			}
 		}
