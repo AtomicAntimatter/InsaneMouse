@@ -13,7 +13,8 @@ import util.Interval2D;
 public abstract class Player 
 {
     private static final int IMMUNITY_LIFETIME = 2000;
-    private int lives = 10;
+	private static final long STARTTIME = System.currentTimeMillis();
+    private int lives = 20;
     private boolean isDead, isImmune;
     private long lastImmunity = 0;
     protected int[] loc = new int[2];
@@ -67,18 +68,28 @@ public abstract class Player
 				lives--;	
 				isImmune = true;
 				lastImmunity = System.currentTimeMillis();	
-				insanity.Game.rejects.addAll(l);
-
-				if(lives == 0)
-				{
-					isDead = true;
-				}						
+				insanity.Game.rejects.addAll(l);				
 			}
+			
+			if(!isImmune
+				&&EnemyManager.bossActive
+				&&this.distanceFrom(EnemyManager.boss.getLoc()) < EnemyManager.boss.size/2)
+			{
+				lives--;	
+				isImmune = true;
+				lastImmunity = System.currentTimeMillis();	
+			}
+			if(lives <= 0)
+			{
+				pi.dead = true;
+				isDead = true;
+			}			
 		}
 		subLogic(m);
 		s.logic();
 		pi.reservoir = s.st.getReservoir();
 		pi.life = lives;
+		pi.score = (int)((System.currentTimeMillis()-STARTTIME)/100);
 	}
 	
     public abstract void subLogic(Input m);

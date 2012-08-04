@@ -1,6 +1,11 @@
 package enemies;
 
-import enemies.EnemyTypes.*;
+import enemies.EnemyTypes.Bomb;
+import enemies.EnemyTypes.Boss;
+import enemies.EnemyTypes.Circle;
+import enemies.EnemyTypes.Monster;
+import enemies.EnemyTypes.Rain;
+import enemies.EnemyTypes.Random;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import org.lwjgl.opengl.Display;
@@ -9,15 +14,19 @@ import player.Player;
 public class EnemyManager
 {
 	private static final int REFRESH_TIME = 10000, ADD_TIME = 1000;
-	private static long lastRefresh = 0, lastAdd = 0;
+	private static long lastRefresh, lastAdd;
+	private static long lastSwitch, switchDelay;
 	private static enum SpawnType{CIRCLE,CEILING,FLOOR,LEFT,RIGHT,RANDOM};
+	private static int level;
 	
-	private static final float CIRCLESPEED = 0.000002f;
+	private static Constructor[] ec;
+	
+	private static final float CIRCLESPEED = 0.000005f;
 	private static final float MONSTERSPEED = 0.2f;
 	private static final float RANDOMSPEED = 0.1f;
-	private static final float RAINSPEED = 0.1f;
+	private static final float RAINSPEED = 0.2f;
 	private static final float BOMBSPEED = 0.5f;
-	private static final int DISTANCE = 500;
+	private static final int DISTANCE = 250000;
 	
 	public static int FPS = 0;
 	public static final int FPS_MIN = 80;
@@ -28,49 +37,137 @@ public class EnemyManager
 	@SuppressWarnings("CallToThreadDumpStack")
 	public static void setup()
 	{
-		spawnBoss(MONSTERSPEED);
-		bossActive = true;
+		reset();
+		
+		try
+		{
+			ec = new Constructor[]{
+				Rain.class.getConstructor(int[].class,float.class),
+				Circle.class.getConstructor(int[].class,float.class),
+				Monster.class.getConstructor(int[].class,float.class),
+				Random.class.getConstructor(int[].class,float.class),
+				Bomb.class.getConstructor(int[].class,float.class)};
+			
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public static void reset()
+	{
+		bossActive = false;
+		level = 0; lastSwitch = 0; switchDelay = 0;
+		lastRefresh = 0; lastAdd = 0;
 	}
 	
 	@SuppressWarnings("CallToThreadDumpStack")
 	public static void manage(final int _FPS)
 	{
 		FPS = _FPS; 
-		/*
+		
 		if(FPS > FPS_MIN)
-		{
-			try
-			{			
-				if(System.currentTimeMillis() - lastRefresh > REFRESH_TIME)
-				{
-					insanity.Game.enemies.clear();
-					lastRefresh = System.currentTimeMillis();
-				}
-				
-				if(System.currentTimeMillis() - lastAdd > ADD_TIME)
-				{							
-					newEnemies(SpawnType.RANDOM, 1, CIRCLESPEED,
-						Circle.class.getConstructor(int[].class,float.class));
-					
-					newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED, 
-						Monster.class.getConstructor(int[].class,float.class));
-					
-					newEnemies(SpawnType.RANDOM, 25, RANDOMSPEED, 
-						Random.class.getConstructor(int[].class,float.class));
-					
-					newEnemies(SpawnType.RANDOM, 25, RAINSPEED, 
-						Rain.class.getConstructor(int[].class,float.class));
-					
-					newEnemies(SpawnType.RANDOM, 1, BOMBSPEED, 
-						Bomb.class.getConstructor(int[].class,float.class));
-					
-					lastAdd = System.currentTimeMillis();
-				}
-			}catch(Exception e)
+		{	
+			if(lastSwitch + switchDelay < System.currentTimeMillis())
 			{
-				e.printStackTrace();
+				lastSwitch = System.currentTimeMillis();
+				switch(level)
+				{
+					case 0:
+						newEnemies(SpawnType.CEILING, 25, RAINSPEED, ec[0]);
+						switchDelay = 4500;
+						break;
+					case 1:
+						newEnemies(SpawnType.CIRCLE, 25, CIRCLESPEED,ec[1]);
+						switchDelay = 700;
+						break;
+					case 2:
+						newEnemies(SpawnType.CIRCLE, 30, CIRCLESPEED,ec[1]);
+						switchDelay = 4500;
+						break;
+					case 3:
+						newEnemies(SpawnType.CIRCLE, 35, CIRCLESPEED,ec[1]);
+						switchDelay = 700;
+						break;
+					case 4:
+						newEnemies(SpawnType.CEILING, 25, CIRCLESPEED,ec[1]);
+						newEnemies(SpawnType.FLOOR, 25, CIRCLESPEED,ec[1]);
+						switchDelay = 4500;
+						break;
+					case 5:
+						newEnemies(SpawnType.CEILING, 25, RAINSPEED, ec[0]);
+						newEnemies(SpawnType.CIRCLE, 25, CIRCLESPEED,ec[1]);
+						newEnemies(SpawnType.CEILING, 25, CIRCLESPEED,ec[1]);
+						newEnemies(SpawnType.FLOOR, 25, CIRCLESPEED,ec[1]);
+						switchDelay = 700;
+						break;
+					case 6:
+						newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED,ec[2]);
+						newEnemies(SpawnType.CIRCLE, 25, CIRCLESPEED,ec[1]);
+						switchDelay = 4500;
+						break;
+					case 7:
+						newEnemies(SpawnType.RANDOM, 25, RANDOMSPEED,ec[3]);
+						newEnemies(SpawnType.CIRCLE, 25, CIRCLESPEED,ec[1]);
+						newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED,ec[2]);
+						switchDelay = 700;
+						break;
+					case 8:
+						newEnemies(SpawnType.RANDOM, 25, CIRCLESPEED,ec[1]);
+						newEnemies(SpawnType.CIRCLE, 25, CIRCLESPEED,ec[1]);
+						newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED,ec[2]);
+						switchDelay = 9000;
+						break;
+					case 9:
+						newEnemies(SpawnType.RANDOM, 5, BOMBSPEED,ec[4]);
+						switchDelay = 5300;
+						break;
+					case 10:
+						newEnemies(SpawnType.RANDOM, 5, BOMBSPEED,ec[4]);
+						newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED,ec[2]);
+						switchDelay = 5300;
+						break;
+					case 11:
+						newEnemies(SpawnType.RANDOM, 2, BOMBSPEED,ec[4]);
+						newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED,ec[2]);
+						newEnemies(SpawnType.CEILING, 10, RAINSPEED, ec[0]);
+						switchDelay = 5300;
+						break;
+					case 12:
+						newEnemies(SpawnType.RANDOM, 5, BOMBSPEED,ec[4]);
+						newEnemies(SpawnType.RANDOM, 5, MONSTERSPEED,ec[2]);
+						switchDelay = 5300;
+						break;
+					case 13:
+						newEnemies(SpawnType.RANDOM, 2, BOMBSPEED,ec[4]);
+						newEnemies(SpawnType.RANDOM, 10, MONSTERSPEED,ec[2]);
+						newEnemies(SpawnType.RANDOM, 10, RANDOMSPEED, ec[3]);
+						switchDelay = 5300;
+						break;
+					case 14:
+						newEnemies(SpawnType.RANDOM, 2, BOMBSPEED,ec[4]);
+						newEnemies(SpawnType.RANDOM, 25, MONSTERSPEED,ec[2]);
+						switchDelay = 5300;
+						break;
+					case 15:
+						newEnemies(SpawnType.RANDOM, 1, BOMBSPEED,ec[4]);
+						newEnemies(SpawnType.RANDOM, 5, MONSTERSPEED,ec[2]);
+						switchDelay = 5300;
+						break;
+					case 16:
+						newEnemies(SpawnType.RANDOM, 1, BOMBSPEED,ec[4]);
+						newEnemies(SpawnType.RANDOM, 5, MONSTERSPEED,ec[2]);
+						switchDelay = 9000;
+						break;
+					case 17:
+						spawnBoss(MONSTERSPEED);
+						bossActive = true;
+						switchDelay = Integer.MAX_VALUE;
+						break;
+				}
+				level++;
 			}
-		}*/
+		}
 	}
 	
 	@SuppressWarnings("CallToThreadDumpStack")
@@ -88,8 +185,8 @@ public class EnemyManager
 						for(int i = 0; i < enemyNum/insanity.Game.players.size(); i++) 
 						{
 							double degree = 2*Math.PI/enemyNum;
-							int x = (int)(p.getLoc()[0] + DISTANCE * (float) Math.sin(degree * i));
-							int y = (int)(p.getLoc()[1] + DISTANCE * (float) Math.cos(degree * i));
+							int x = (int)(p.getLoc()[0] + Math.sqrt(DISTANCE) * (float) Math.sin(degree * i));
+							int y = (int)(p.getLoc()[1] + Math.sqrt(DISTANCE) * (float) Math.cos(degree * i));
 							int[] mloc = {x,y};
 							Enemy e = (Enemy)c.newInstance(mloc, enemySpeed);
 							insanity.Game.qa.insert(mloc[0], mloc[1], e);

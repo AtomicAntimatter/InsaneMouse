@@ -40,7 +40,9 @@ public abstract class Enemy
 			Interval<Integer> intX = new Interval<Integer>((int)loc[0]-1, (int)loc[0]+1);
 			Interval<Integer> intY = new Interval<Integer>((int)loc[1]-1, (int)loc[1]+1);
 			Interval2D<Integer> rect = new Interval2D<Integer>(intX, intY);
-			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, this.getClass()); 
+			LinkedList<Enemy> l = insanity.Game.qa.query2D(rect, this.getClass());
+			LinkedList<Enemy> lm = insanity.Game.qa.query2D(rect, EnemyTypes.Boss.class);
+			l.removeAll(lm);
 			if(!l.isEmpty())
 			{
 				if(l.contains(this))
@@ -49,8 +51,33 @@ public abstract class Enemy
 				}	
 				insanity.Game.rejects.addAll(l);
 			}
+
+			if(EnemyTypes.Boss.class.isInstance(this))
+			{
+				l.clear();
+				l = insanity.Game.qa.query2D(rect, Enemy.class);
+				if(!l.isEmpty())
+				{
+					if(l.contains(this))
+					{
+						l.remove(this);
+					}
+					
+					for(int i = 0; i < l.size(); i++)
+					{
+						if(!l.get(i).bossMinion)
+						{
+							this.size = Math.min(10+this.size, 100);
+							EnemyManager.boss.health = Math.min(EnemyManager.boss.health+1, EnemyManager.boss.MAXHEALTH);
+						}
+					}
+			
+					insanity.Game.rejects.addAll(l);
+				}
+			}
 		}
-		if(!EnemyManager.bossActive||bossMinion)
+		if(!EnemyManager.bossActive||bossMinion
+			||creationTime+breatheTime>System.currentTimeMillis())
 		{
 			subLogic(delta);
 		}

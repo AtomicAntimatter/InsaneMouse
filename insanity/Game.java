@@ -39,7 +39,6 @@ public class Game extends BasicGameState
 	@Override
 	public void init(GameContainer container, StateBasedGame game) throws SlickException 
 	{
-		playerSetup();
 		EnemyManager.setup();
 		PlayerHUD.setup(container);
 	}
@@ -48,12 +47,18 @@ public class Game extends BasicGameState
 	public void enter(GameContainer container, StateBasedGame game) throws SlickException 
 	{
 		container.setMouseGrabbed(true);
+		playerSetup();
+		Sound.start();
 	}
 	
 	@Override
 	public void leave(GameContainer container, StateBasedGame game) throws SlickException 
 	{
 		container.setMouseGrabbed(false);
+		reset();
+		EnemyManager.reset();
+		PlayerHUD.reset();
+		Sound.stop();
 	}
 
 	@Override
@@ -79,7 +84,7 @@ public class Game extends BasicGameState
 	@Override
 	public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException 
 	{
-		if(container.getInput().isKeyPressed(Input.KEY_ESCAPE)) container.exit();
+		if(container.getInput().isKeyPressed(Input.KEY_ESCAPE)) game.enterState(Insanity.MAINMENUSTATE);
 		
 		EnemyManager.manage(container.getFPS());
 		

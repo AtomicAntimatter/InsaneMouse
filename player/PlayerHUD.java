@@ -1,5 +1,6 @@
 package player;
 
+import enemies.EnemyManager;
 import java.util.LinkedList;
 import java.util.List;
 import org.newdawn.slick.*;
@@ -23,13 +24,18 @@ public class PlayerHUD
 			e.printStackTrace();
 		}
 	}
+	
+	public static void reset()
+	{
+		pInfo.clear();
+	}
 		
 	public static void render(Graphics g)
 	{
 		hudIMG.draw(0, 0);
 		
 		g.setColor(Color.white);
-		g.drawString(String.valueOf(insanity.Game.enemies.size()), dim[0]-100, 20);
+		g.drawString(String.valueOf(insanity.Game.enemies.size()), dim[0]-200, 20);
 		
 		for(int i = 0; i < pInfo.size(); i++)
 		{
@@ -40,6 +46,7 @@ public class PlayerHUD
 			g.drawString(pi.num + ": " + pi.name, spot+15, 10);
 			
 			g.drawString(String.valueOf(pi.life), spot+120, 10);
+			g.drawString(String.valueOf(pi.score), spot+150, 10);
 			
 			g.setColor(Color.cyan);
 			g.fillRect(spot+15, 30, 150*pi.reservoir/SBSK_Timer.MAX_RESERVOIR, 5);
@@ -54,6 +61,12 @@ public class PlayerHUD
 			}
 			
 			g.fillOval(spot, 15, 10, 10);
+		}
+		
+		if(EnemyManager.bossActive)
+		{
+			g.setColor(Color.red);
+			g.fillRect(dim[0]*0.125f, 80, dim[0]*0.75f*EnemyManager.boss.health/EnemyManager.boss.MAXHEALTH, 10);
 		}
 	}
 }

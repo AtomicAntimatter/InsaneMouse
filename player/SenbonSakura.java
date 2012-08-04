@@ -14,8 +14,8 @@ public class SenbonSakura
 {
     private static final int 
             SBSK_R = 150,
-            SBSK_LT = 5000,
-			SBSK_RT = 3000;
+            SBSK_LT = 3000,
+			SBSK_RT = 2000;
 
 	public SBSK_Timer st = new SBSK_Timer();
 	private HashSet<SBSK_Bomb> bSet = new HashSet<SBSK_Bomb>();
@@ -133,6 +133,7 @@ public class SenbonSakura
 						
 						if(EnemyManager.boss.health <= 0)
 						{
+							EnemyManager.bossActive = false;		
 							insanity.Game.rejects.add(EnemyManager.boss);
 						}
 					}		
